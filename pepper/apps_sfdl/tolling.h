@@ -53,13 +53,13 @@ to the black box given to customers.
 typedef uint32_t cost_t;
 typedef uint16_t toll_booth_id_t;
 
-struct tuple {
+struct my_tuple {
   int32_t time;
   toll_booth_id_t toll_booth_id;
   cost_t toll;
 };
 
-typedef struct tuple tuple_t;
+typedef struct my_tuple tuple_t;
 
 //Testing purposes
 //We assume no car drives through more than 50 toll booths in a month
