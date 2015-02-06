@@ -46,9 +46,15 @@ void simple_hashgetProverExo::baseline(const mpq_t* input_q, int num_inputs,
   struct In input;
   struct Out output;
   // Fill code here to prepare input from input_q.
+  int inp = 0;
   
   // Call baseline_minimal to run the computation
-  output.value = 20;
+  int val = 15;
+//  hash_t hash_of_val;
+//  hashget(&val, &hash_of_val);
+//  gmp_printf("******Hash bits: %d", numHashBits());
+//  gmp_printf("******Hash chunks: %d", NUM_HASH_CHUNKS);
+  output.value = val;
   // Fill code here to dump output to output_recomputed.
   mpq_set_si(output_recomputed[0], 0, 1);
   mpq_set_si(output_recomputed[1], output.value, 1);
