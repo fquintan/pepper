@@ -50,7 +50,7 @@ void merkleProverExo::baseline(const mpq_t* input_q, int num_inputs,
 
   // Fill code here to dump output to output_recomputed.
   mpq_set_si(output_recomputed[0], 0, 1);
-  mpq_set_si(output_recomputed[1], 1, 1);
+  mpq_set_si(output_recomputed[1], 0, 1);
 }
 
 //Refer to apps_sfdl_gen/merkle_cons.h for constants to use in this exogenous

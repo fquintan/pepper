@@ -2,19 +2,25 @@
 #include <db.h>
 #include "merkle.h"
 
+
+void copy_data(data* from, data* to){
+	int i;
+	for (i = 0; i < DATA_LENGTH; i++){
+		to->msg[i] = from->msg[i];
+	}
+}
+void copy_node(merkleNode* from, merkleNode* to){
+	 copy_data(&from->val, &to->val);
+}
+
 void compute_parent(merkleNode* left, merkleNode* right, merkleNode* parent){
-/*	sha1_in shaIn;
+	sha1_in shaIn;
 	dataToShaIn(&left->val, &right->val, &shaIn);
 	sha1_out shaOut;
 	compute_sha1(&shaIn, &shaOut);
 	data dataOut;
 	shaOutToData(&shaOut, &dataOut);
-	parent->val = dataOut;*/
-	// SHA256_CTX ctx;
-	// sha256_init(&ctx);
-	// sha256_update(&ctx, left->val.msg, DATA_LENGTH);
-	// sha256_update(&ctx, right->val.msg, DATA_LENGTH);
-	// sha256_final(&ctx, parent->val.msg); 
+	copy_data(&dataOut, &parent->val);
 }
 
 
@@ -71,52 +77,55 @@ void shaOutToData(sha1_out* sha, data* d){
 void compute_proof(merkleTree* tree, int index, merkleProof* proof){
 	int i;
 	proof->index = index;
+	index = SIZE + index;
+	int aux;
 	for (i = 0; i < HEIGHT; i++){
 		if (index % 2 == 0){
-			proof->path[i] = tree->nodes[SIZE+index+1];
+			copy_node(&tree->nodes[index+1], &proof->path[i]);
 		}
 		else {
-			proof->path[i] = tree->nodes[SIZE+index-1];	
+			copy_node(&tree->nodes[index-1], &proof->path[i]);
 		}
 		index = index / 2;
 	}
 }
+
+
 
 /*Verify the correctnes of a given merkle proof
   returns 0 on a correct proof*/
 int verify_proof(merkleTree* tree, merkleProof* proof, data* expected_root){
-	int index = proof->index;
 	int i;
+	int index = proof->index + SIZE;
 	merkleNode current;
-	current.val = proof->nodes[SIZE+index].val;
-	for(i = 0; i < HEIGHT; i++){
-		if (index % 2){
-			compute_parent(current, proof->path[i], current);
+	copy_node(&tree->nodes[index], &current);
+	for (i = 0; i < HEIGHT; i++){
+		if (index % 2 == 0){
+			compute_parent(&current, &proof->path[i], &current);
 		}
 		else {
-			compute_parent(proof->path[i], current, current);
+			compute_parent(&proof->path[i], &current, &current);
 		}
 		index = index / 2;
 	}
-	return compare_data(expected_root, current.val);
+	return compare_data(expected_root, &current.val);
 }
 
+
 void compute(struct In *input, struct Out *output){
-	output->result = 0;
 	int i;
-	data d;
 	arrayOfData arr;
-	data aux;
 	hashget(&arr, &input->hash_of_db);
 	merkleTree tree;
-	/*First copy the data array into the leafs of an empty merkleTree*/
 	for (i = 0; i < SIZE; i++){
-		tree.nodes[SIZE+i].val = arr.data_arr[i];
+		copy_data(&(arr.data_arr[i]), &(tree.nodes[SIZE+i].val));
 	}
-	/*Then compute the whole tree from the leafs*/
 	compute_merkle_tree(&tree);
-	/*Check the correctness of the computed tree*/
-	output->result = 1;
+	merkleProof proof;
+	compute_proof(&tree, 1, &proof);
+	data d;
+	copy_data(&tree.nodes[1].val, &d);
+	output->result = verify_proof(&tree, &proof, &d);
 }
 
 
