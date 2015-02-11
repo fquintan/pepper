@@ -20,6 +20,7 @@ void simple_hashgetVerifierInpGenHw::create_input(mpq_t* input_q, int num_inputs
   //Default implementation is provided by compiler
   compiler_implementation.create_input(input_q, num_inputs);
   #endif
+    /*Initialize DB and variables*/
 	char db_file_path[BUFLEN];
 	snprintf(db_file_path, BUFLEN - 1, "%s/block_stores/prover_1_%s", FOLDER_STATE,
 	shared_bstore_file_name.c_str());
@@ -27,13 +28,16 @@ void simple_hashgetVerifierInpGenHw::create_input(mpq_t* input_q, int num_inputs
 	int i;
 	hash_t hash;
 
+	/*Fill array*/
 	struct intArray val;
 	for (i = 0; i < simple_hashget_cons::MAX_SIZE; i++){
 		val.arr[i] = i+1;
 	}
+	/*Save array in DB*/
 	hashput2(&bs, &hash, &val);
 	int inp = 0;
 
+	/*Dump hash into input*/
 	for(i = 0; i < NUM_HASH_CHUNKS; i++){
 		mpq_set_ui(input_q[inp++], hash.bit[i], 1);
 	}
