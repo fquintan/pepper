@@ -1,17 +1,9 @@
+#include <gmp.h>
 #include <stdint.h>
 #include <db.h>
-
 #include "benford_law.h"
 
 int first_digit(int n){
-/*	if (n < 0) n = 0 - n;
-	int i;
-	for(i; i < MAX_LENGTH; i++){
-		if (n > 10){
-			n = n / 10;
-		}
-	}
-	return n;*/
 	if(n > 1000000000) n = n / 1000000000;
 	else if(n > 100000000) n = n / 100000000;
 	else if(n > 10000000) n = n / 10000000;
@@ -27,9 +19,11 @@ int first_digit(int n){
 void compute_digit_distribution(struct numberArray* array, struct distribution* dist){
 	int i;
 	int digit;
+	mpz_t current;
+		
 	for (i = 0; i < MAX_SIZE; i++){
 		digit = first_digit(array->arr[i]);
-		dist->arr[digit]++;
+		dist->count[digit]++;
 	}
 }
 
@@ -39,15 +33,19 @@ int most_frequent(struct distribution* dist){
 	int max = 0;
 	int index = 0;
 	for(i = 0; i < 10; i++){
-		if (dist->arr[i] > max){
-			max = dist->arr[i];
+		if (dist->count[i] > max){
+			max = dist->count[i];
 			index = i;
 		}
 	}
 	return i;
 }
 
+
 int check_distribution(struct distribution* dist){
+	/*First (simple) approach
+	 TODO: statisticaly check the distribution
+	*/
 	int result = most_frequent(dist);
 	return result;
 }
